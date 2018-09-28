@@ -5,7 +5,9 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import javax.imageio.ImageIO;
@@ -17,8 +19,31 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class WaterMarkUtils {
 	
-	public static Image addWaterMark(String srcImgPath, String waterMarkContent) {
-		return WaterMarkUtils.addWaterMark(srcImgPath, null, waterMarkContent,  Color.BLACK, new Font("微软雅黑", Font.PLAIN, 35));
+	private static Font font;
+	
+	public static Font getFont(String fontDir) {
+		if (font != null) {
+			return font;
+		}
+		
+		File file = new File(fontDir);
+		try {
+			FileInputStream fi = new FileInputStream(file);
+			BufferedInputStream fb = new BufferedInputStream(fi);
+			font = Font.createFont(Font.TRUETYPE_FONT, fb);
+		} catch (Exception e) {
+		}
+		if (font != null) {
+			font = font.deriveFont(Font.PLAIN, 35);
+		}
+		return font;
+	}
+	
+	public static Image addWaterMark(String srcImgPath, String waterMarkContent, Font font) {
+		if (font == null) {
+			font = new Font("微软雅黑", Font.PLAIN, 35);
+		}
+		return WaterMarkUtils.addWaterMark(srcImgPath, null, waterMarkContent,  Color.BLACK, font);
 	}
 
 	/**
@@ -60,7 +85,7 @@ public class WaterMarkUtils {
 				// 输出图片
 				if (StringUtils.isNotBlank(tarImgPath)) {
 					FileOutputStream outImgStream = new FileOutputStream(tarImgPath);
-					ImageIO.write(bufImg, "jpg", outImgStream);
+					ImageIO.write(bufImg, "png", outImgStream);
 					System.out.println("添加水印完成");
 					outImgStream.flush();
 					outImgStream.close();
@@ -80,8 +105,8 @@ public class WaterMarkUtils {
 
 	public static void main(String[] args) {
 		Font font = new Font("微软雅黑", Font.PLAIN, 35); // 水印字体
-		String srcImgPath = "C:/Users/corwu/Desktop/1.jpg"; // 源图片地址
-		String tarImgPath = "C:/Users/corwu/Desktop/2.jpg"; // 待存储的地址
+		String srcImgPath = "C:/Users/corwu/Desktop/1.png"; // 源图片地址
+		String tarImgPath = "C:/Users/corwu/Desktop/2.png"; // 待存储的地址
 		String waterMarkContent = "这我老婆"; // 水印内容
 		Color color = Color.BLACK; // 水印图片色彩以及透明度
 		WaterMarkUtils.addWaterMark(srcImgPath, tarImgPath, waterMarkContent, color, font);
